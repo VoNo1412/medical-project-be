@@ -320,7 +320,7 @@ app.get('/appointments', async (req, res) => {
 });
 
 // API to get the list of users
-app.get('/users', authMiddleware, async (req, res) => {
+app.get('/users', async (req, res) => {
     console.log("Get users request received");
     try {
         const selectUsersSql = 'SELECT * FROM users';
@@ -335,7 +335,7 @@ app.get('/users', authMiddleware, async (req, res) => {
 });
 
 // API to add a new user
-app.post('/users', authMiddleware, async (req, res) => {
+app.post('/users', async (req, res) => {
     console.log("Add user request received", req.body);
     const { username, password, role, status } = req.body;
     try {
@@ -352,7 +352,7 @@ app.post('/users', authMiddleware, async (req, res) => {
 });
 
 // API to update an existing user
-app.put('/users/:id', authMiddleware, async (req, res) => {
+app.put('/users/:id', async (req, res) => {
     console.log("Update user request received", req.body);
     const { id } = req.params;
     const { username, password, role, status } = req.body;
@@ -370,7 +370,7 @@ app.put('/users/:id', authMiddleware, async (req, res) => {
 });
 
 // API to delete a user
-app.delete('/users/:id', authMiddleware, async (req, res) => {
+app.delete('/users/:id', async (req, res) => {
     console.log("Delete user request received", req.params);
     const { id } = req.params;
     try {
