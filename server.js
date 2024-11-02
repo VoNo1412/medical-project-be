@@ -51,12 +51,14 @@ connectDatabase();
 
 // Authentication middleware
 function authMiddleware(req, res, next) {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         console.log("No token provided");
         return res.status(401).json({ message: "Chưa đăng nhập" });
     }
+
+    const token = authHeader.split(' ')[1];
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
