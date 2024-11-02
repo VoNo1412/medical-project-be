@@ -319,6 +319,21 @@ app.get('/appointments', async (req, res) => {
     }
 });
 
+// API to get the list of users
+app.get('/users', authMiddleware, async (req, res) => {
+    console.log("Get users request received");
+    try {
+        const selectUsersSql = 'SELECT * FROM users';
+        const [users,] = await db.query(selectUsersSql);
+
+        console.log("Users retrieved", users);
+        return res.json(users);
+    } catch (error) {
+        console.log("Failed to retrieve users", error);
+        return res.status(500).json({ message: "An error occurred while fetching the users" });
+    }
+});
+
 // API to add a new user
 app.post('/users', authMiddleware, async (req, res) => {
     console.log("Add user request received", req.body);
