@@ -323,7 +323,19 @@ app.get('/appointments', async (req, res) => {
 app.get('/users', async (req, res) => {
     console.log("Get users request received");
     try {
-        const selectUsersSql = 'SELECT * FROM users';
+        const selectUsersSql = `
+            SELECT 
+                u.id, 
+                u.username, 
+                u.role, 
+                u.status, 
+                u.created_at, 
+                p.fullname 
+            FROM 
+                users u
+            LEFT JOIN 
+                patients p ON u.id = p.user_id
+        `;
         const [users,] = await db.query(selectUsersSql);
 
         console.log("Users retrieved", users);
