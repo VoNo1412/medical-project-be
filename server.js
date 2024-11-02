@@ -222,6 +222,54 @@ app.get('/doctors', async (req, res) => {
     }
 });
 
+app.post('/doctors', async (req, res) => {
+    console.log("Add doctor request received", req.body);
+    const { user_id, fullname, phone, address, gender, birth_year, specialty } = req.body;
+    try {
+        const insertDoctorSql = 'INSERT INTO doctors (user_id, fullname, phone, address, gender, birth_year, specialty, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())';
+        await db.execute(insertDoctorSql, [user_id, fullname, phone, address, gender, birth_year, specialty]);
+
+        console.log("Doctor added successfully");
+        return res.status(200).json({ message: "Doctor added successfully" });
+    } catch (error) {
+        console.log("Failed to add doctor", error);
+        return res.status(500).json({ message: "An error occurred while adding the doctor" });
+    }
+});
+
+// API to update an existing doctor
+app.put('/doctors/:id', async (req, res) => {
+    console.log("Update doctor request received", req.body);
+    const { id } = req.params;
+    const { user_id, fullname, phone, address, gender, birth_year, specialty } = req.body;
+    try {
+        const updateDoctorSql = 'UPDATE doctors SET user_id = ?, fullname = ?, phone = ?, address = ?, gender = ?, birth_year = ?, specialty = ? WHERE id = ?';
+        await db.execute(updateDoctorSql, [user_id, fullname, phone, address, gender, birth_year, specialty, id]);
+
+        console.log("Doctor updated successfully");
+        return res.status(200).json({ message: "Doctor updated successfully" });
+    } catch (error) {
+        console.log("Failed to update doctor", error);
+        return res.status(500).json({ message: "An error occurred while updating the doctor" });
+    }
+});
+
+// API to delete a doctor
+app.delete('/doctors/:id', async (req, res) => {
+    console.log("Delete doctor request received", req.params);
+    const { id } = req.params;
+    try {
+        const deleteDoctorSql = 'DELETE FROM doctors WHERE id = ?';
+        await db.execute(deleteDoctorSql, [id]);
+
+        console.log("Doctor deleted successfully");
+        return res.status(200).json({ message: "Doctor deleted successfully" });
+    } catch (error) {
+        console.log("Failed to delete doctor", error);
+        return res.status(500).json({ message: "An error occurred while deleting the doctor" });
+    }
+});
+
 app.post('/book-appointment', async (req, res) => {
     console.log("Book appointment request received", req.body);
     await db.query("START TRANSACTION");
@@ -268,6 +316,155 @@ app.get('/appointments', async (req, res) => {
     } catch (error) {
         console.log("Failed to retrieve appointments", error);
         return res.status(500).json({ message: "An error occurred while fetching the appointments" });
+    }
+});
+
+// API to add a new user
+app.post('/users', authMiddleware, async (req, res) => {
+    console.log("Add user request received", req.body);
+    const { username, password, role, status } = req.body;
+    try {
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        const insertUserSql = 'INSERT INTO users (username, password, role, status) VALUES (?, ?, ?, ?)';
+        await db.execute(insertUserSql, [username, hashedPassword, role, status]);
+
+        console.log("User added successfully");
+        return res.status(200).json({ message: "User added successfully" });
+    } catch (error) {
+        console.log("Failed to add user", error);
+        return res.status(500).json({ message: "An error occurred while adding the user" });
+    }
+});
+
+// API to update an existing user
+app.put('/users/:id', authMiddleware, async (req, res) => {
+    console.log("Update user request received", req.body);
+    const { id } = req.params;
+    const { username, password, role, status } = req.body;
+    try {
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        const updateUserSql = 'UPDATE users SET username = ?, password = ?, role = ?, status = ? WHERE id = ?';
+        await db.execute(updateUserSql, [username, hashedPassword, role, status, id]);
+
+        console.log("User updated successfully");
+        return res.status(200).json({ message: "User updated successfully" });
+    } catch (error) {
+        console.log("Failed to update user", error);
+        return res.status(500).json({ message: "An error occurred while updating the user" });
+    }
+});
+
+// API to delete a user
+app.delete('/users/:id', authMiddleware, async (req, res) => {
+    console.log("Delete user request received", req.params);
+    const { id } = req.params;
+    try {
+        const deleteUserSql = 'DELETE FROM users WHERE id = ?';
+        await db.execute(deleteUserSql, [id]);
+
+        console.log("User deleted successfully");
+        return res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+        console.log("Failed to delete user", error);
+        return res.status(500).json({ message: "An error occurred while deleting the user" });
+    }
+});
+
+// API to add a new appointment
+app.post('/hour_appointments', async (req, res) => {
+    console.log("Add appointment request received", req.body);
+    const { doctor_id, appointment_date, appointment_hour, patient_name, patient_phone, patient_address, patient_gender, patient_birth_year, appointment_reason } = req.body;
+    try {
+        const insertAppointmentSql = 'INSERT INTO hour_appointments (doctor_id, appointment_date, appointment_hour, patient_name, patient_phone, patient_address, patient_gender, patient_birth_year, appointment_reason, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
+        await db.execute(insertAppointmentSql, [doctor_id, appointment_date, appointment_hour, patient_name, patient_phone, patient_address, patient_gender, patient_birth_year, appointment_reason]);
+
+        console.log("Appointment added successfully");
+        return res.status(200).json({ message: "Appointment added successfully" });
+    } catch (error) {
+        console.log("Failed to add appointment", error);
+        return res.status(500).json({ message: "An error occurred while adding the appointment" });
+    }
+});
+
+// API to update an existing appointment
+app.put('/hour_appointments/:id', async (req, res) => {
+    console.log("Update appointment request received", req.body);
+    const { id } = req.params;
+    const { doctor_id, appointment_date, appointment_hour, patient_name, patient_phone, patient_address, patient_gender, patient_birth_year, appointment_reason } = req.body;
+    try {
+        const updateAppointmentSql = 'UPDATE hour_appointments SET doctor_id = ?, appointment_date = ?, appointment_hour = ?, patient_name = ?, patient_phone = ?, patient_address = ?, patient_gender = ?, patient_birth_year = ?, appointment_reason = ? WHERE id = ?';
+        await db.execute(updateAppointmentSql, [doctor_id, appointment_date, appointment_hour, patient_name, patient_phone, patient_address, patient_gender, patient_birth_year, appointment_reason, id]);
+
+        console.log("Appointment updated successfully");
+        return res.status(200).json({ message: "Appointment updated successfully" });
+    } catch (error) {
+        console.log("Failed to update appointment", error);
+        return res.status(500).json({ message: "An error occurred while updating the appointment" });
+    }
+});
+
+// API to delete an appointment
+app.delete('/hour_appointments/:id', async (req, res) => {
+    console.log("Delete appointment request received", req.params);
+    const { id } = req.params;
+    try {
+        const deleteAppointmentSql = 'DELETE FROM hour_appointments WHERE id = ?';
+        await db.execute(deleteAppointmentSql, [id]);
+
+        console.log("Appointment deleted successfully");
+        return res.status(200).json({ message: "Appointment deleted successfully" });
+    } catch (error) {
+        console.log("Failed to delete appointment", error);
+        return res.status(500).json({ message: "An error occurred while deleting the appointment" });
+    }
+});
+
+// API to add a new specialty
+app.post('/specialties', async (req, res) => {
+    console.log("Add specialty request received", req.body);
+    const { name, description } = req.body;
+    try {
+        const insertSpecialtySql = 'INSERT INTO specialties (name, description, created_at) VALUES (?, ?, NOW())';
+        await db.execute(insertSpecialtySql, [name, description]);
+
+        console.log("Specialty added successfully");
+        return res.status(200).json({ message: "Specialty added successfully" });
+    } catch (error) {
+        console.log("Failed to add specialty", error);
+        return res.status(500).json({ message: "An error occurred while adding the specialty" });
+    }
+});
+
+// API to update an existing specialty
+app.put('/specialties/:id', async (req, res) => {
+    console.log("Update specialty request received", req.body);
+    const { id } = req.params;
+    const { name, description } = req.body;
+    try {
+        const updateSpecialtySql = 'UPDATE specialties SET name = ?, description = ? WHERE id = ?';
+        await db.execute(updateSpecialtySql, [name, description, id]);
+
+        console.log("Specialty updated successfully");
+        return res.status(200).json({ message: "Specialty updated successfully" });
+    } catch (error) {
+        console.log("Failed to update specialty", error);
+        return res.status(500).json({ message: "An error occurred while updating the specialty" });
+    }
+});
+
+// API to delete a specialty
+app.delete('/specialties/:id', async (req, res) => {
+    console.log("Delete specialty request received", req.params);
+    const { id } = req.params;
+    try {
+        const deleteSpecialtySql = 'DELETE FROM specialties WHERE id = ?';
+        await db.execute(deleteSpecialtySql, [id]);
+
+        console.log("Specialty deleted successfully");
+        return res.status(200).json({ message: "Specialty deleted successfully" });
+    } catch (error) {
+        console.log("Failed to delete specialty", error);
+        return res.status(500).json({ message: "An error occurred while deleting the specialty" });
     }
 });
 
