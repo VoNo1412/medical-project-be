@@ -99,20 +99,20 @@ app.post('/login', async (req, res) => {
 
             res.setHeader('Access-Control-Allow-Credentials', 'true');
 
+            const response = { message: "Đăng nhập thành công", token };
+
             if (selectUserResult[0].role === 'admin') {
                 console.log("Admin login successful");
-                return res.json({ message: "Đăng nhập thành công", redirect: "/admin" });
-            }
-
-            if (selectUserResult[0].role === 'doctor') {
+                response.redirect = "/admin";
+            } else if (selectUserResult[0].role === 'doctor') {
                 console.log("Doctor login successful");
-                return res.json({ message: "Đăng nhập thành công", redirect: "/doctor" });
+                response.redirect = "/doctor";
+            } else if (selectUserResult[0].role === 'patient') {
+                console.log("Patient login successful");
+                response.redirect = "/";
             }
 
-            if (selectUserResult[0].role === 'patient') {
-                console.log("Patient login successful");
-                return res.json({ message: "Đăng nhập thành công", redirect: "/" });
-            }
+            return res.json(response);
         } else {
             console.log("Invalid password");
             return res.json("Mật khẩu không đúng");
