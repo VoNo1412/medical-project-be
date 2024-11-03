@@ -401,16 +401,29 @@ const updateUserInDB = async (id, { fullname, username, phone, address, gender, 
     }
 };
 
-// API to delete a user
 app.delete('/users/:id', async (req, res) => {
     console.log("Delete user request received", req.params);
     const { id } = req.params;
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
+
+        // Retrieve the user_id from the patients table
+        const selectUserIdSql = 'SELECT user_id FROM patients WHERE id = ?';
+        const [rows] = await connection.execute(selectUserIdSql, [id]);
+
+        if (rows.length === 0) {
+            await connection.rollback();
+            console.log("Patient not found");
+            return res.status(404).json({ message: "Patient not found" });
+        }
+
+        const userId = rows[0].user_id;
+
+        // Delete from users and patients tables
         const deleteUserSql = 'DELETE FROM users WHERE id = ?';
-        const deletePatientSql = 'DELETE FROM patients WHERE user_id = ?';
-        await connection.execute(deleteUserSql, [id]);
+        const deletePatientSql = 'DELETE FROM patients WHERE id = ?';
+        await connection.execute(deleteUserSql, [userId]);
         await connection.execute(deletePatientSql, [id]);
         await connection.commit();
 
