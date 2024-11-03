@@ -365,24 +365,16 @@ app.post('/users', async (req, res) => {
 
 // API to update an existing user
 const updateUser = (req, res) => {
-    const { fullname, email, password } = req.body;
-
-    // Ensure password is provided
-    if (!password) {
-        return res.status(400).send('Password is required');
-    }
+    const { fullname, email } = req.body;
 
     // Generate a salt
     const salt = bcrypt.genSaltSync(10);
 
-    // Hash the password with the salt
-    const hashedPassword = bcrypt.hashSync(password, salt);
-
     // Log the data being passed to updateUserInDB
-    console.log('Updating user with data:', { fullname, email, password: hashedPassword });
+    console.log('Updating user with data:', { fullname, email });
 
     // Proceed with updating the user in the database
-    updateUserInDB({ fullname, email, password: hashedPassword })
+    updateUserInDB({ fullname, email})
         .then(() => res.status(200).send('User updated successfully'))
         .catch(error => res.status(500).send(`Failed to update user: ${error.message}`));
 };
@@ -390,9 +382,9 @@ const updateUser = (req, res) => {
 // Example route in Express
 app.put('/users/:id', updateUser);
 
-const updateUserInDB = async ({ fullname, email, password }) => {
-    const updateUserSql = 'UPDATE users SET fullname = ?, email = ?, password = ? WHERE id = ?';
-    await db.execute(updateUserSql, [fullname, email, password, id]);
+const updateUserInDB = async ({ fullname, email }) => {
+    const updateUserSql = 'UPDATE users SET fullname = ?, email = ? WHERE id = ?';
+    await db.execute(updateUserSql, [fullname, email, id]);
 };
 
 // API to delete a user
