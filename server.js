@@ -593,6 +593,20 @@ app.delete('/hour_appointments/:id', async (req, res) => {
     }
 });
 
+app.get('/specialties', async (req, res) => {
+    console.log("Get specialties request received");
+    try {
+        const selectSpecialtiesSql = 'SELECT * FROM specialties';
+        const [specialties,] = await db.query(selectSpecialtiesSql);
+
+        console.log("Specialties retrieved", specialties);
+        return res.json(specialties);
+    } catch (error) {
+        console.log("Failed to retrieve specialties", error);
+        return res.status(500).json({ message: "An error occurred while fetching the specialties" });
+    }
+});
+
 // API to add a new specialty
 app.post('/specialties', async (req, res) => {
     console.log("Add specialty request received", req.body);
