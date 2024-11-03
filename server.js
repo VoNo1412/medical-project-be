@@ -243,7 +243,37 @@ app.get('/doctors', async (req, res) => {
         return res.status(500).json({ message: "An error occurred while fetching the doctors" });
     }
 });
+app.post('/doctors', async (req, res) => {
+    console.log("Add doctor request received", req.body);
+    const { username, password, fullname, phone, address, gender, birth_year, specialty } = req.body;
 
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Insert into users table
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        const insertUserSql = 'INSERT INTO users (username, password, role, status) VALUES (?, ?, "doctor", 1)';
+        const [userResult] = await connection.execute(insertUserSql, [username, hashedPassword]);
+
+        const userId = userResult.insertId;
+
+        // Insert into doctors table
+        const insertDoctorSql = 'INSERT INTO doctors (user_id, fullname, phone, address, gender, birth_year, specialty, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())';
+        await connection.execute(insertDoctorSql, [userId, fullname, phone, address, gender, birth_year, specialty]);
+
+        await connection.commit();
+
+        console.log("Doctor added successfully");
+        return res.status(200).json({ message: "Doctor added successfully" });
+    } catch (error) {
+        await connection.rollback();
+        console.log("Failed to add doctor", error);
+        return res.status(500).json({ message: "An error occurred while adding the doctor" });
+    } finally {
+        connection.release();
+    }
+});
 app.put('/doctors/:id', async (req, res) => {
     console.log("Update doctor request received", req.body);
     const { id } = req.params;
@@ -320,6 +350,7 @@ app.delete('/doctors/:id', async (req, res) => {
         connection.release();
     }
 });
+
 
 app.post('/book-appointment', async (req, res) => {
     console.log("Book appointment request received", req.body);
