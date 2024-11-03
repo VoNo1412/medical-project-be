@@ -327,21 +327,21 @@ app.get('/users', async (req, res) => {
     console.log("Get users request received");
     try {
         const selectUsersSql = `
-            SELECT 
-                u.id, 
-                u.username, 
-                u.role, 
-                u.status, 
-                u.created_at, 
+            SELECT
+                u.id,
+                u.username,
+                u.role,
+                u.status,
+                u.created_at,
                 p.fullname,
                 p.phone,
                 p.address,
                 p.gender,
                 p.birth_year
-            FROM 
-                users u
-            LEFT JOIN 
-                patients p ON u.id = p.user_id
+            FROM
+                patients p
+                    LEFT JOIN
+                users u ON p.user_id = u.id
         `;
         const [users,] = await db.query(selectUsersSql);
 
@@ -381,7 +381,6 @@ const updateUser = (req, res) => {
         .catch(error => res.status(500).send(`Failed to update user: ${error.message}`));
 };
 
-// Example route in Express
 app.put('/users/:id', updateUser);
 
 const updateUserInDB = async (id, { fullname, username, phone, address, gender, birth_year }) => {
@@ -406,15 +405,23 @@ const updateUserInDB = async (id, { fullname, username, phone, address, gender, 
 app.delete('/users/:id', async (req, res) => {
     console.log("Delete user request received", req.params);
     const { id } = req.params;
+    const connection = await db.getConnection();
     try {
+        await connection.beginTransaction();
         const deleteUserSql = 'DELETE FROM users WHERE id = ?';
-        await db.execute(deleteUserSql, [id]);
+        const deletePatientSql = 'DELETE FROM patients WHERE user_id = ?';
+        await connection.execute(deleteUserSql, [id]);
+        await connection.execute(deletePatientSql, [id]);
+        await connection.commit();
 
         console.log("User deleted successfully");
         return res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
+        await connection.rollback();
         console.log("Failed to delete user", error);
         return res.status(500).json({ message: "An error occurred while deleting the user" });
+    } finally {
+        connection.release();
     }
 });
 
