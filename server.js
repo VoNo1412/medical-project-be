@@ -364,22 +364,36 @@ app.post('/users', async (req, res) => {
 });
 
 // API to update an existing user
-app.put('/users/:id', async (req, res) => {
-    console.log("Update user request received", req.body);
-    const { id } = req.params;
-    const { username, password, role, status } = req.body;
-    try {
-        const hashedPassword = bcrypt.hashSync(password, 10);
-        const updateUserSql = 'UPDATE users SET username = ?, password = ?, role = ?, status = ? WHERE id = ?';
-        await db.execute(updateUserSql, [username, hashedPassword, role, status, id]);
+const updateUser = (req, res) => {
+    const { fullname, email, password } = req.body;
 
-        console.log("User updated successfully");
-        return res.status(200).json({ message: "User updated successfully" });
-    } catch (error) {
-        console.log("Failed to update user", error);
-        return res.status(500).json({ message: "An error occurred while updating the user" });
+    // Ensure password is provided
+    if (!password) {
+        return res.status(400).send('Password is required');
     }
-});
+
+    // Generate a salt
+    const salt = bcrypt.genSaltSync(10);
+
+    // Hash the password with the salt
+    const hashedPassword = bcrypt.hashSync(password, salt);
+
+    // Log the data being passed to updateUserInDB
+    console.log('Updating user with data:', { fullname, email, password: hashedPassword });
+
+    // Proceed with updating the user in the database
+    updateUserInDB({ fullname, email, password: hashedPassword })
+        .then(() => res.status(200).send('User updated successfully'))
+        .catch(error => res.status(500).send(`Failed to update user: ${error.message}`));
+};
+
+// Example route in Express
+app.put('/users/:id', updateUser);
+
+const updateUserInDB = async ({ fullname, email, password }) => {
+    const updateUserSql = 'UPDATE users SET fullname = ?, email = ?, password = ? WHERE id = ?';
+    await db.execute(updateUserSql, [fullname, email, password, id]);
+};
 
 // API to delete a user
 app.delete('/users/:id', async (req, res) => {
