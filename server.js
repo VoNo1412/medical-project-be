@@ -435,17 +435,33 @@ app.get('/users', async (req, res) => {
 // API to add a new user
 app.post('/users', async (req, res) => {
     console.log("Add user request received", req.body);
-    const { username, password, role, status } = req.body;
+    const { username, password, fullname, phone, address, gender, birth_year } = req.body;
+
+    const connection = await db.getConnection();
     try {
+        await connection.beginTransaction();
+
+        // Insert into users table
         const hashedPassword = bcrypt.hashSync(password, 10);
-        const insertUserSql = 'INSERT INTO users (username, password, role, status) VALUES (?, ?, ?, ?)';
-        await db.execute(insertUserSql, [username, hashedPassword, role, status]);
+        const insertUserSql = 'INSERT INTO users (username, password, role, status) VALUES (?, ?, "patient", 1)';
+        const [userResult] = await connection.execute(insertUserSql, [username, hashedPassword]);
+
+        const userId = userResult.insertId;
+
+        // Insert into patients table
+        const insertPatientSql = 'INSERT INTO patients (user_id, fullname, phone, address, gender, birth_year, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())';
+        await connection.execute(insertPatientSql, [userId, fullname, phone, address, gender, birth_year]);
+
+        await connection.commit();
 
         console.log("User added successfully");
         return res.status(200).json({ message: "User added successfully" });
     } catch (error) {
+        await connection.rollback();
         console.log("Failed to add user", error);
         return res.status(500).json({ message: "An error occurred while adding the user" });
+    } finally {
+        connection.release();
     }
 });
 
