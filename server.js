@@ -369,15 +369,10 @@ app.post('/users', async (req, res) => {
 // API to update an existing user
 const updateUser = (req, res) => {
     const { fullname, email } = req.body;
-
-    // Generate a salt
-    const salt = bcrypt.genSaltSync(10);
-
-    // Log the data being passed to updateUserInDB
+    const { id } = req.params;
     console.log('Updating user with data:', { fullname, email });
 
-    // Proceed with updating the user in the database
-    updateUserInDB({ fullname, email})
+    updateUserInDB(id, { fullname, email })
         .then(() => res.status(200).send('User updated successfully'))
         .catch(error => res.status(500).send(`Failed to update user: ${error.message}`));
 };
@@ -385,7 +380,7 @@ const updateUser = (req, res) => {
 // Example route in Express
 app.put('/users/:id', updateUser);
 
-const updateUserInDB = async ({ fullname, email }) => {
+const updateUserInDB = async (id, { fullname, email }) => {
     const updateUserSql = 'UPDATE users SET fullname = ?, email = ? WHERE id = ?';
     await db.execute(updateUserSql, [fullname, email, id]);
 };
