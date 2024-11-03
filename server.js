@@ -328,7 +328,7 @@ app.get('/users', async (req, res) => {
     try {
         const selectUsersSql = `
             SELECT
-                u.id,
+                p.id,
                 u.username,
                 u.role,
                 u.status,
