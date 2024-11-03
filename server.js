@@ -372,11 +372,11 @@ app.post('/users', async (req, res) => {
 
 // API to update an existing user
 const updateUser = (req, res) => {
-    const { fullname, email, phone, address, gender, birth_year } = req.body;
+    const { fullname, username, phone, address, gender, birth_year } = req.body;
     const { id } = req.params;
-    console.log('Updating user with data:', { fullname, email, phone, address, gender, birth_year });
+    console.log('Updating user with data:', { fullname, username, phone, address, gender, birth_year });
 
-    updateUserInDB(id, { fullname, email, phone, address, gender, birth_year })
+    updateUserInDB(id, { fullname, username, phone, address, gender, birth_year })
         .then(() => res.status(200).send('User updated successfully'))
         .catch(error => res.status(500).send(`Failed to update user: ${error.message}`));
 };
@@ -384,14 +384,14 @@ const updateUser = (req, res) => {
 // Example route in Express
 app.put('/users/:id', updateUser);
 
-const updateUserInDB = async (id, { fullname, email, phone, address, gender, birth_year }) => {
-    const updateUserSql = 'UPDATE users SET email = ? WHERE id = ?';
+const updateUserInDB = async (id, { fullname, username, phone, address, gender, birth_year }) => {
+    const updateUserSql = 'UPDATE users SET username = ? WHERE id = ?';
     const updatePatientSql = 'UPDATE patients SET fullname = ?, phone = ?, address = ?, gender = ?, birth_year = ? WHERE user_id = ?';
 
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
-        await connection.execute(updateUserSql, [email, id]);
+        await connection.execute(updateUserSql, [username, id]);
         await connection.execute(updatePatientSql, [fullname, phone, address, gender, birth_year, id]);
         await connection.commit();
     } catch (error) {
