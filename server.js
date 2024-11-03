@@ -371,35 +371,46 @@ app.post('/users', async (req, res) => {
 });
 
 // API to update an existing user
-const updateUser = (req, res) => {
+const updateUser = async (req, res) => {
     const { fullname, username, phone, address, gender, birth_year } = req.body;
     const { id } = req.params;
     console.log('Updating user with data:', { fullname, username, phone, address, gender, birth_year });
 
-    updateUserInDB(id, { fullname, username, phone, address, gender, birth_year })
-        .then(() => res.status(200).send('User updated successfully'))
-        .catch(error => res.status(500).send(`Failed to update user: ${error.message}`));
-};
-
-app.put('/users/:id', updateUser);
-
-const updateUserInDB = async (id, { fullname, username, phone, address, gender, birth_year }) => {
-    const updateUserSql = 'UPDATE users SET username = ? WHERE id = ?';
-    const updatePatientSql = 'UPDATE patients SET fullname = ?, phone = ?, address = ?, gender = ?, birth_year = ? WHERE user_id = ?';
-
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
-        await connection.execute(updateUserSql, [username, id]);
+
+        // Retrieve the user_id from the patients table
+        const selectUserIdSql = 'SELECT user_id FROM patients WHERE id = ?';
+        const [rows] = await connection.execute(selectUserIdSql, [id]);
+
+        if (rows.length === 0) {
+            await connection.rollback();
+            console.log("Patient not found");
+            return res.status(404).json({ message: "Patient not found" });
+        }
+
+        const userId = rows[0].user_id;
+
+        // Update users and patients tables
+        const updateUserSql = 'UPDATE users SET username = ? WHERE id = ?';
+        const updatePatientSql = 'UPDATE patients SET fullname = ?, phone = ?, address = ?, gender = ?, birth_year = ? WHERE id = ?';
+        await connection.execute(updateUserSql, [username, userId]);
         await connection.execute(updatePatientSql, [fullname, phone, address, gender, birth_year, id]);
         await connection.commit();
+
+        console.log("User updated successfully");
+        return res.status(200).json({ message: "User updated successfully" });
     } catch (error) {
         await connection.rollback();
-        throw error;
+        console.log("Failed to update user", error);
+        return res.status(500).json({ message: "An error occurred while updating the user" });
     } finally {
         connection.release();
     }
 };
+
+app.put('/users/:id', updateUser);
 
 app.delete('/users/:id', async (req, res) => {
     console.log("Delete user request received", req.params);
