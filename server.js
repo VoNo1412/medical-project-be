@@ -374,7 +374,7 @@ app.post('/users', async (req, res) => {
 const updateUser = async (req, res) => {
     const { fullname, username, phone, address, gender, birth_year } = req.body;
     const { id } = req.params;
-    console.log('Updating user with data:', { fullname, username, phone, address, gender, birth_year });
+    console.log('Updating user with data:', { fullname, username, phone, address, gender, birth_year, id });
 
     const connection = await db.getConnection();
     try {
