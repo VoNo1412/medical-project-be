@@ -111,7 +111,10 @@ app.get('/me', authMiddleware, async (req, res) => {
             console.log("Admin user info retrieved");
             return res.json({
                 user: selectUserResult[0],
-                profile: null
+                profile: {
+                    fullname: "Admin",
+                    'id': 0,
+                }
             });
         }
 
