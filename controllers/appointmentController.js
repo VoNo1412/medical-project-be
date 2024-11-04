@@ -24,6 +24,7 @@ exports.getAppointments = async (req, res) => {
         const selectAppointmentsSql = `
             SELECT
                 ba.id,
+                ba.user_id,
                 ba.fullname,
                 ba.phone,
                 ba.address,
