@@ -6,7 +6,7 @@ exports.getAllFollowUpAppointments = async (req, res) => {
         const sql = `
             SELECT
                 f.id,
-                f.patient_name,
+                f.patient_name as patient_id,
                 f.follow_up_date,
                 f.notes,
                 f.doctor_id,
