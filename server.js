@@ -36,7 +36,8 @@ app.use(cors({
     origin: [
         'http://localhost:3000',
         'https://545b-42-114-32-182.ngrok-free.app',
-        'https://nhakhoa-72d284770bf0.herokuapp.com'
+        'https://nhakhoa-72d284770bf0.herokuapp.com',
+        'https://b066-42-114-35-0.ngrok-free.app' // Add this line
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

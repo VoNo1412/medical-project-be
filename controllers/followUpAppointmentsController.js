@@ -13,10 +13,10 @@ exports.getAllFollowUpAppointments = async (req, res) => {
 
 // Add a new follow-up appointment
 exports.addFollowUpAppointment = async (req, res) => {
-    const { patient_name, follow_up_date, notes } = req.body;
+    const { patient_name, follow_up_date, notes, doctor_id } = req.body;
     try {
-        const insertAppointmentSql = 'INSERT INTO follow_up_appointments (patient_name, follow_up_date, notes, created_at) VALUES (?, ?, ?, NOW())';
-        await db.execute(insertAppointmentSql, [patient_name, follow_up_date, notes]);
+        const insertAppointmentSql = 'INSERT INTO follow_up_appointments (patient_name, follow_up_date, notes, doctor_id, created_at) VALUES (?, ?, ?, ?, NOW())';
+        await db.execute(insertAppointmentSql, [patient_name, follow_up_date, notes, doctor_id]);
         return res.status(200).json({ message: 'Follow-up appointment added successfully' });
     } catch (error) {
         console.error('Error adding follow-up appointment:', error);
@@ -27,10 +27,10 @@ exports.addFollowUpAppointment = async (req, res) => {
 // Update an existing follow-up appointment
 exports.updateFollowUpAppointment = async (req, res) => {
     const { id } = req.params;
-    const { patient_name, follow_up_date, notes } = req.body;
+    const { patient_name, follow_up_date, notes, doctor_id } = req.body;
     try {
-        const updateAppointmentSql = 'UPDATE follow_up_appointments SET patient_name = ?, follow_up_date = ?, notes = ? WHERE id = ?';
-        await db.execute(updateAppointmentSql, [patient_name, follow_up_date, notes, id]);
+        const updateAppointmentSql = 'UPDATE follow_up_appointments SET patient_name = ?, follow_up_date = ?, notes = ?, doctor_id = ? WHERE id = ?';
+        await db.execute(updateAppointmentSql, [patient_name, follow_up_date, notes, doctor_id, id]);
         return res.status(200).json({ message: 'Follow-up appointment updated successfully' });
     } catch (error) {
         console.error('Error updating follow-up appointment:', error);
