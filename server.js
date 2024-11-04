@@ -23,6 +23,8 @@ const doctorRoutes = require('./routes/doctorRoutes');
 const authRoutes = require('./routes/authRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const patientRoutes = require('./routes/patientRoutes');
+const followUpAppointmentsRoutes = require('./routes/followUpAppointmentsRoutes');
+
 
 // Tạo một instance của ứng dụng Express
 const app = express();
@@ -85,6 +87,8 @@ function authMiddleware(req, res, next) {
 }
 app.use('/auth', authRoutes);
 app.use('/medical-records', medicalRecordsRoutes);
+app.use('/follow-up-appointments', followUpAppointmentsRoutes);
+
 
 
 app.get('/me', authMiddleware, async (req, res) => {
