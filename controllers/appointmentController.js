@@ -66,6 +66,22 @@ exports.confirmAppointment = async (req, res) => {
     }
 };
 
+exports.rejectAppointment = async (req, res) => {
+    console.log("Reject appointment request received", req.params);
+    const { id } = req.params;
+
+    try {
+        const updateStatusSql = 'UPDATE booking_appointments SET status = ? WHERE id = ?';
+        await db.execute(updateStatusSql, ['reject', id]);
+
+        console.log("Appointment rejected successfully");
+        return res.status(200).json({ message: "Appointment rejected successfully" });
+    } catch (error) {
+        console.log("Failed to reject appointment", error);
+        return res.status(500).json({ message: "An error occurred while rejecting the appointment", error: error.message });
+    }
+};
+
 exports.updateAppointment = async (req, res) => {
     console.log("Update appointment request received", req.body);
     const { id } = req.params;
