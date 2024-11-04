@@ -28,7 +28,12 @@ exports.addMedicalRecord = async (req, res) => {
             'INSERT INTO medical_records (patient_id, doctor_id, diagnosis, treatment, record_date) VALUES (?, ?, ?, ?, ?) RETURNING *',
             [patient_id, doctor_id, diagnosis, treatment, record_date]
         );
-        res.json(result.rows[0]);
+
+        if (result && result.rows && result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            throw new Error('No rows returned from the query');
+        }
     } catch (error) {
         console.error('Error adding medical record:', error);
         res.status(500).json({ error: 'Failed to add medical record', details: error.message });
