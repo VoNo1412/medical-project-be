@@ -24,6 +24,7 @@ const authRoutes = require('./routes/authRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const followUpAppointmentsRoutes = require('./routes/followUpAppointmentsRoutes');
+const specialtyRoutes = require('./routes/specialtyRoutes');
 
 
 // Tạo một instance của ứng dụng Express
@@ -91,7 +92,7 @@ app.use('/medical-records', medicalRecordsRoutes);
 app.use('/follow-up-appointments', followUpAppointmentsRoutes);
 
 
-
+app.use('/uploads', express.static('uploads'));
 app.get('/me', authMiddleware, async (req, res) => {
     console.log("Get user info request received");
     try {
@@ -142,7 +143,7 @@ app.get('/me', authMiddleware, async (req, res) => {
 app.use('/doctors', doctorRoutes);
 app.use('/appointments', appointmentRoutes);
 app.use('/patients', patientRoutes);
-
+app.use('/specialties', specialtyRoutes);
 
 // API to add a new appointment
 app.post('/hour_appointments', async (req, res) => {
@@ -190,69 +191,6 @@ app.delete('/hour_appointments/:id', async (req, res) => {
     } catch (error) {
         console.log("Failed to delete appointment", error);
         return res.status(500).json({ message: "An error occurred while deleting the appointment" });
-    }
-});
-
-app.get('/specialties', async (req, res) => {
-    console.log("Get specialties request received");
-    try {
-        const selectSpecialtiesSql = 'SELECT * FROM specialties';
-        const [specialties,] = await db.query(selectSpecialtiesSql);
-
-        console.log("Specialties retrieved", specialties);
-        return res.json(specialties);
-    } catch (error) {
-        console.log("Failed to retrieve specialties", error);
-        return res.status(500).json({ message: "An error occurred while fetching the specialties" });
-    }
-});
-
-// API to add a new specialty
-app.post('/specialties', async (req, res) => {
-    console.log("Add specialty request received", req.body);
-    const { name, description } = req.body;
-    try {
-        const insertSpecialtySql = 'INSERT INTO specialties (name, description, created_at) VALUES (?, ?, NOW())';
-        await db.execute(insertSpecialtySql, [name, description]);
-
-        console.log("Specialty added successfully");
-        return res.status(200).json({ message: "Specialty added successfully" });
-    } catch (error) {
-        console.log("Failed to add specialty", error);
-        return res.status(500).json({ message: "An error occurred while adding the specialty" });
-    }
-});
-
-// API to update an existing specialty
-app.put('/specialties/:id', async (req, res) => {
-    console.log("Update specialty request received", req.body);
-    const { id } = req.params;
-    const { name, description } = req.body;
-    try {
-        const updateSpecialtySql = 'UPDATE specialties SET name = ?, description = ? WHERE id = ?';
-        await db.execute(updateSpecialtySql, [name, description, id]);
-
-        console.log("Specialty updated successfully");
-        return res.status(200).json({ message: "Specialty updated successfully" });
-    } catch (error) {
-        console.log("Failed to update specialty", error);
-        return res.status(500).json({ message: "An error occurred while updating the specialty" });
-    }
-});
-
-// API to delete a specialty
-app.delete('/specialties/:id', async (req, res) => {
-    console.log("Delete specialty request received", req.params);
-    const { id } = req.params;
-    try {
-        const deleteSpecialtySql = 'DELETE FROM specialties WHERE id = ?';
-        await db.execute(deleteSpecialtySql, [id]);
-
-        console.log("Specialty deleted successfully");
-        return res.status(200).json({ message: "Specialty deleted successfully" });
-    } catch (error) {
-        console.log("Failed to delete specialty", error);
-        return res.status(500).json({ message: "An error occurred while deleting the specialty" });
     }
 });
 

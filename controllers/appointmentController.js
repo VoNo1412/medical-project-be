@@ -31,6 +31,7 @@ exports.getAppointments = async (req, res) => {
                 ba.birth_year,
                 ba.appointment_date,
                 ba.appointment_time,
+                ba.status,
                 d.fullname AS doctor_name,
                 ba.content,
                 ba.created_at
@@ -45,7 +46,23 @@ exports.getAppointments = async (req, res) => {
         return res.json(appointments);
     } catch (error) {
         console.log("Failed to retrieve appointments", error);
-        return res.status(500).json({ message: "An error occurred while fetching the appointments" });
+        return res.status(500).json({ message: "An error occurred while fetching the appointments", error: error.message });
+    }
+};
+
+exports.confirmAppointment = async (req, res) => {
+    console.log("Confirm appointment request received", req.params);
+    const { id } = req.params;
+
+    try {
+        const updateStatusSql = 'UPDATE booking_appointments SET status = ? WHERE id = ?';
+        await db.execute(updateStatusSql, ['accept', id]);
+
+        console.log("Appointment confirmed successfully");
+        return res.status(200).json({ message: "Appointment confirmed successfully" });
+    } catch (error) {
+        console.log("Failed to confirm appointment", error);
+        return res.status(500).json({ message: "An error occurred while confirming the appointment", error: error.message });
     }
 };
 

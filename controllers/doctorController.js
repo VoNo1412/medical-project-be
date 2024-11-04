@@ -25,6 +25,7 @@ exports.getDoctors = async (req, res) => {
                 d.fullname,
                 d.phone,
                 d.address,
+                d.image,
                 d.gender,
                 d.birth_year,
                 d.specialty,
@@ -86,42 +87,52 @@ exports.addDoctor = async (req, res) => {
 };
 
 exports.updateDoctor = async (req, res) => {
-    console.log("Update doctor request received", req.body);
-    const { id } = req.params;
-    const { fullname, username, phone, address, gender, birth_year, specialty } = req.body;
-
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-
-        const selectUserIdSql = 'SELECT user_id FROM doctors WHERE id = ?';
-        const [rows] = await connection.execute(selectUserIdSql, [id]);
-
-        if (rows.length === 0) {
-            await connection.rollback();
-            console.log("Doctor not found");
-            return res.status(404).json({ message: "Doctor not found" });
+    upload.single('image')(req, res, async (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
         }
 
-        const userId = rows[0].user_id;
+        console.log("Update doctor request received", req.body);
+        const { id } = req.params;
+        const { fullname, username, phone, address, gender, birth_year, specialty } = req.body;
+        const image = req.file ? req.file.path : null;
 
-        const updateUserSql = 'UPDATE users SET username = ? WHERE id = ?';
-        const updateDoctorSql = 'UPDATE doctors SET fullname = ?, phone = ?, address = ?, gender = ?, birth_year = ?, specialty = ? WHERE id = ?';
-        await connection.execute(updateUserSql, [username, userId]);
-        await connection.execute(updateDoctorSql, [fullname, phone, address, gender, birth_year, specialty, id]);
-        await connection.commit();
+        const connection = await db.getConnection();
+        try {
+            await connection.beginTransaction();
 
-        console.log("Doctor updated successfully");
-        return res.status(200).json({ message: "Doctor updated successfully" });
-    } catch (error) {
-        await connection.rollback();
-        console.log("Failed to update doctor", error);
-        return res.status(500).json({ message: "An error occurred while updating the doctor" });
-    } finally {
-        connection.release();
-    }
+            const selectUserIdSql = 'SELECT user_id FROM doctors WHERE id = ?';
+            const [rows] = await connection.execute(selectUserIdSql, [id]);
+
+            if (rows.length === 0) {
+                await connection.rollback();
+                console.log("Doctor not found");
+                return res.status(404).json({ message: "Doctor not found" });
+            }
+
+            const userId = rows[0].user_id;
+
+            const updateUserSql = 'UPDATE users SET username = ? WHERE id = ?';
+            const updateDoctorSql = `
+                UPDATE doctors 
+                SET fullname = ?, phone = ?, address = ?, gender = ?, birth_year = ?, specialty = ?, image = COALESCE(?, image) 
+                WHERE id = ?
+            `;
+            await connection.execute(updateUserSql, [username, userId]);
+            await connection.execute(updateDoctorSql, [fullname, phone, address, gender, birth_year, specialty, image, id]);
+            await connection.commit();
+
+            console.log("Doctor updated successfully");
+            return res.status(200).json({ message: "Doctor updated successfully" });
+        } catch (error) {
+            await connection.rollback();
+            console.log("Failed to update doctor", error);
+            return res.status(500).json({ message: "An error occurred while updating the doctor" });
+        } finally {
+            connection.release();
+        }
+    });
 };
-
 exports.deleteDoctor = async (req, res) => {
     console.log("Delete doctor request received", req.params);
     const { id } = req.params;
