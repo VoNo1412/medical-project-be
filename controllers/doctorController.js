@@ -29,6 +29,7 @@ exports.getDoctors = async (req, res) => {
                 d.gender,
                 d.birth_year,
                 s.name AS specialty_name,
+                d.specialty,
                 d.created_at,
                 u.username,
                 u.role,
