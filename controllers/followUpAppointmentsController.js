@@ -15,15 +15,15 @@ exports.getAllFollowUpAppointments = async (req, res) => {
 
 // Add a new follow-up appointment
 exports.addFollowUpAppointment = async (req, res) => {
-    const { patient_name, follow_up_date, notes, doctor_id } = req.body;
-    if (doctor_id === undefined) {
+    const { patientName, followUpDate, notes, doctorId } = req.body;
+    if (doctorId === undefined) {
         return res.status(400).json({ message: 'Doctor ID is required' });
     }
     try {
         const insertAppointmentSql = 'INSERT INTO follow_up_appointments (patient_name, follow_up_date, notes, doctor_id, created_at) VALUES (?, ?, ?, ?, NOW())';
         console.log('SQL Query:', insertAppointmentSql);
         console.log('Request Data:', req.body);
-        await db.execute(insertAppointmentSql, [patient_name, follow_up_date, notes, doctor_id]);
+        await db.execute(insertAppointmentSql, [patientName, followUpDate, notes, doctorId]);
         return res.status(200).json({ message: 'Follow-up appointment added successfully' });
     } catch (error) {
         console.error('Error adding follow-up appointment:', error);
@@ -34,12 +34,12 @@ exports.addFollowUpAppointment = async (req, res) => {
 // Update an existing follow-up appointment
 exports.updateFollowUpAppointment = async (req, res) => {
     const { id } = req.params;
-    const { patient_name, follow_up_date, notes, doctor_id } = req.body;
+    const { patientName, followUpDate, notes, doctorId } = req.body;
     try {
         const updateAppointmentSql = 'UPDATE follow_up_appointments SET patient_name = ?, follow_up_date = ?, notes = ?, doctor_id = ? WHERE id = ?';
         console.log('SQL Query:', updateAppointmentSql);
         console.log('Request Data:', req.body);
-        await db.execute(updateAppointmentSql, [patient_name, follow_up_date, notes, doctor_id, id]);
+        await db.execute(updateAppointmentSql, [patientName, followUpDate, notes, doctorId, id]);
         return res.status(200).json({ message: 'Follow-up appointment updated successfully' });
     } catch (error) {
         console.error('Error updating follow-up appointment:', error);
