@@ -20,10 +20,10 @@ exports.getMedicalRecords = async (req, res) => {
         `;
         console.log('Executing query:', query);
 
-        const result = await db.query(query);
-        console.log('Query result:', result);
+        const [medicalRecords,] = await db.query(query);
+        console.log('Query result:', medicalRecords);
 
-        res.json(result);
+        res.json(medicalRecords);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch medical records' });
     }
