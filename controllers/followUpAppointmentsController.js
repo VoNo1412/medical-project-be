@@ -16,6 +16,9 @@ exports.getAllFollowUpAppointments = async (req, res) => {
 // Add a new follow-up appointment
 exports.addFollowUpAppointment = async (req, res) => {
     const { patient_name, follow_up_date, notes, doctor_id } = req.body;
+    if (doctor_id === undefined) {
+        return res.status(400).json({ message: 'Doctor ID is required' });
+    }
     try {
         const insertAppointmentSql = 'INSERT INTO follow_up_appointments (patient_name, follow_up_date, notes, doctor_id, created_at) VALUES (?, ?, ?, ?, NOW())';
         console.log('SQL Query:', insertAppointmentSql);
