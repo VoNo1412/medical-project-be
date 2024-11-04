@@ -28,7 +28,7 @@ exports.getDoctors = async (req, res) => {
                 d.image,
                 d.gender,
                 d.birth_year,
-                d.specialty,
+                s.name AS specialty_name,
                 d.created_at,
                 u.username,
                 u.role,
@@ -38,6 +38,8 @@ exports.getDoctors = async (req, res) => {
                 doctors d
                     LEFT JOIN
                 users u ON d.user_id = u.id
+                    LEFT JOIN
+                specialties s ON d.specialty = s.id
         `;
         const [doctors,] = await db.query(selectDoctorsSql);
 
