@@ -1,5 +1,19 @@
 const db = require('../db'); // Adjust the path as necessary
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const path = require('path');
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+
+const upload = multer({ storage });
 
 exports.getDoctors = async (req, res) => {
     console.log("Get doctors request received");
@@ -21,7 +35,7 @@ exports.getDoctors = async (req, res) => {
                 u.created_at AS user_created_at
             FROM
                 doctors d
-            LEFT JOIN
+                    LEFT JOIN
                 users u ON d.user_id = u.id
         `;
         const [doctors,] = await db.query(selectDoctorsSql);
@@ -35,33 +49,40 @@ exports.getDoctors = async (req, res) => {
 };
 
 exports.addDoctor = async (req, res) => {
-    console.log("Add doctor request received", req.body);
-    const { username, password, fullname, phone, address, gender, birth_year, specialty } = req.body;
+    upload.single('image')(req, res, async (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
 
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
+        console.log("Add doctor request received", req.body);
+        const { username, password, fullname, phone, address, gender, birth_year, specialty } = req.body;
+        const image = req.file ? req.file.path : null;
 
-        const hashedPassword = bcrypt.hashSync(password, 10);
-        const insertUserSql = 'INSERT INTO users (username, password, role, status) VALUES (?, ?, "doctor", 1)';
-        const [userResult] = await connection.execute(insertUserSql, [username, hashedPassword]);
+        const connection = await db.getConnection();
+        try {
+            await connection.beginTransaction();
 
-        const userId = userResult.insertId;
+            const hashedPassword = bcrypt.hashSync(password, 10);
+            const insertUserSql = 'INSERT INTO users (username, password, role, status) VALUES (?, ?, "doctor", 1)';
+            const [userResult] = await connection.execute(insertUserSql, [username, hashedPassword]);
 
-        const insertDoctorSql = 'INSERT INTO doctors (user_id, fullname, phone, address, gender, birth_year, specialty, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())';
-        await connection.execute(insertDoctorSql, [userId, fullname, phone, address, gender, birth_year, specialty]);
+            const userId = userResult.insertId;
 
-        await connection.commit();
+            const insertDoctorSql = 'INSERT INTO doctors (user_id, fullname, phone, address, gender, birth_year, specialty, image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())';
+            await connection.execute(insertDoctorSql, [userId, fullname, phone, address, gender, birth_year, specialty, image]);
 
-        console.log("Doctor added successfully");
-        return res.status(200).json({ message: "Doctor added successfully" });
-    } catch (error) {
-        await connection.rollback();
-        console.log("Failed to add doctor", error);
-        return res.status(500).json({ message: "An error occurred while adding the doctor" });
-    } finally {
-        connection.release();
-    }
+            await connection.commit();
+
+            console.log("Doctor added successfully");
+            return res.status(200).json({ message: "Doctor added successfully" });
+        } catch (error) {
+            await connection.rollback();
+            console.log("Failed to add doctor", error);
+            return res.status(500).json({ message: "An error occurred while adding the doctor" });
+        } finally {
+            connection.release();
+        }
+    });
 };
 
 exports.updateDoctor = async (req, res) => {
