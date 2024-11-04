@@ -3,10 +3,10 @@ const db = require('../db'); // Adjust the path as necessary
 exports.bookAppointment = async (req, res) => {
     console.log("Book appointment request received", req.body);
     await db.query("START TRANSACTION");
-    const { fullname, phone, address, gender, birthYear, appointmentDate, appointmentTime, doctorId, content } = req.body;
+    const { fullname, phone, address, gender, birthYear, appointmentDate, appointmentTime, doctorId, content, userId } = req.body;
     try {
-        const insertBookingSql = 'INSERT INTO booking_appointments (fullname, phone, address, gender, birth_year, appointment_date, appointment_time, doctor_id, content) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        await db.execute(insertBookingSql, [fullname, phone, address, gender, birthYear, appointmentDate, appointmentTime, doctorId, content]);
+        const insertBookingSql = 'INSERT INTO booking_appointments (fullname, phone, address, gender, birth_year, appointment_date, appointment_time, doctor_id, content, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        await db.execute(insertBookingSql, [fullname, phone, address, gender, birthYear, appointmentDate, appointmentTime, doctorId, content, userId]);
 
         await db.query("COMMIT");
         console.log("Appointment booked successfully");
