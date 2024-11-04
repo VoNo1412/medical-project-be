@@ -1,8 +1,12 @@
 const db = require('../db');
 
+function formatQuery(query, params) {
+    return query.replace(/\?/g, () => params.shift());
+}
+
 exports.getMedicalRecords = async (req, res) => {
     try {
-        const result = await db.query(`
+        const query = `
             SELECT
                 medical_records.id,
                 patients.fullname AS patient_name,
@@ -13,7 +17,10 @@ exports.getMedicalRecords = async (req, res) => {
             FROM medical_records
                      JOIN patients ON medical_records.patient_id = patients.id
                      JOIN doctors ON medical_records.doctor_id = doctors.id
-        `);
+        `;
+        console.log('Executing query:', query);
+
+        const result = await db.query(query);
         res.json(result.rows);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch medical records' });
@@ -24,10 +31,11 @@ exports.addMedicalRecord = async (req, res) => {
     const { patient_id, doctor_id, diagnosis, treatment, record_date } = req.body;
     console.log('Received data:', { patient_id, doctor_id, diagnosis, treatment, record_date });
     try {
-        const result = await db.query(
-            'INSERT INTO medical_records (patient_id, doctor_id, diagnosis, treatment, record_date) VALUES (?, ?, ?, ?, ?) RETURNING *',
-            [patient_id, doctor_id, diagnosis, treatment, record_date]
-        );
+        const query = 'INSERT INTO medical_records (patient_id, doctor_id, diagnosis, treatment, record_date) VALUES (?, ?, ?, ?, ?) RETURNING *';
+        const params = [patient_id, doctor_id, diagnosis, treatment, record_date];
+        console.log('Executing query:', formatQuery(query, [...params]));
+
+        const result = await db.query(query, params);
 
         if (result && result.rows && result.rows.length > 0) {
             res.json(result.rows[0]);
@@ -44,10 +52,11 @@ exports.updateMedicalRecord = async (req, res) => {
     const { id } = req.params;
     const { patient_id, doctor_id, diagnosis, treatment, record_date } = req.body;
     try {
-        const result = await db.query(
-            'UPDATE medical_records SET patient_id = ?, doctor_id = ?, diagnosis = ?, treatment = ?, record_date = ? WHERE id = ? RETURNING *',
-            [patient_id, doctor_id, diagnosis, treatment, record_date, id]
-        );
+        const query = 'UPDATE medical_records SET patient_id = ?, doctor_id = ?, diagnosis = ?, treatment = ?, record_date = ? WHERE id = ? RETURNING *';
+        const params = [patient_id, doctor_id, diagnosis, treatment, record_date, id];
+        console.log('Executing query:', formatQuery(query, [...params]));
+
+        const result = await db.query(query, params);
         res.json(result.rows[0]);
     } catch (error) {
         res.status(500).json({ error: 'Failed to update medical record' });
@@ -57,7 +66,11 @@ exports.updateMedicalRecord = async (req, res) => {
 exports.deleteMedicalRecord = async (req, res) => {
     const { id } = req.params;
     try {
-        await db.query('DELETE FROM medical_records WHERE id = ?', [id]);
+        const query = 'DELETE FROM medical_records WHERE id = ?';
+        const params = [id];
+        console.log('Executing query:', formatQuery(query, [...params]));
+
+        await db.query(query, params);
         res.json({ message: 'Medical record deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete medical record' });
