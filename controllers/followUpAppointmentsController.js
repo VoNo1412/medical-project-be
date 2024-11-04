@@ -3,7 +3,9 @@ const db = require('../db');
 // Get all follow-up appointments
 exports.getAllFollowUpAppointments = async (req, res) => {
     try {
-        const [appointments,] = await db.query('SELECT * FROM follow_up_appointments');
+        const sql = 'SELECT * FROM follow_up_appointments';
+        console.log('SQL Query:', sql);
+        const [appointments,] = await db.query(sql);
         return res.json(appointments);
     } catch (error) {
         console.error('Error fetching follow-up appointments:', error);
@@ -16,6 +18,8 @@ exports.addFollowUpAppointment = async (req, res) => {
     const { patient_name, follow_up_date, notes, doctor_id } = req.body;
     try {
         const insertAppointmentSql = 'INSERT INTO follow_up_appointments (patient_name, follow_up_date, notes, doctor_id, created_at) VALUES (?, ?, ?, ?, NOW())';
+        console.log('SQL Query:', insertAppointmentSql);
+        console.log('Request Data:', req.body);
         await db.execute(insertAppointmentSql, [patient_name, follow_up_date, notes, doctor_id]);
         return res.status(200).json({ message: 'Follow-up appointment added successfully' });
     } catch (error) {
@@ -30,6 +34,8 @@ exports.updateFollowUpAppointment = async (req, res) => {
     const { patient_name, follow_up_date, notes, doctor_id } = req.body;
     try {
         const updateAppointmentSql = 'UPDATE follow_up_appointments SET patient_name = ?, follow_up_date = ?, notes = ?, doctor_id = ? WHERE id = ?';
+        console.log('SQL Query:', updateAppointmentSql);
+        console.log('Request Data:', req.body);
         await db.execute(updateAppointmentSql, [patient_name, follow_up_date, notes, doctor_id, id]);
         return res.status(200).json({ message: 'Follow-up appointment updated successfully' });
     } catch (error) {
@@ -43,6 +49,8 @@ exports.deleteFollowUpAppointment = async (req, res) => {
     const { id } = req.params;
     try {
         const deleteAppointmentSql = 'DELETE FROM follow_up_appointments WHERE id = ?';
+        console.log('SQL Query:', deleteAppointmentSql);
+        console.log('Request Params:', req.params);
         await db.execute(deleteAppointmentSql, [id]);
         return res.status(200).json({ message: 'Follow-up appointment deleted successfully' });
     } catch (error) {
