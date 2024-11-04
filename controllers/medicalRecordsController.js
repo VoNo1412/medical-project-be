@@ -35,13 +35,8 @@ exports.addMedicalRecord = async (req, res) => {
         const params = [patient_id, doctor_id, diagnosis, treatment, record_date];
         console.log('Executing query:', formatQuery(query, [...params]));
 
-        const result = await db.query(query, params);
-
-        if (result && result.rows && result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            throw new Error('No rows returned from the query');
-        }
+        await db.query(query, params);
+        return res.json({ message: 'Medical record added successfully' });
     } catch (error) {
         console.error('Error adding medical record:', error);
         res.status(500).json({ error: 'Failed to add medical record', details: error.message });
@@ -55,9 +50,8 @@ exports.updateMedicalRecord = async (req, res) => {
         const query = 'UPDATE medical_records SET patient_id = ?, doctor_id = ?, diagnosis = ?, treatment = ?, record_date = ? WHERE id = ?';
         const params = [patient_id, doctor_id, diagnosis, treatment, record_date, id];
         console.log('Executing query:', formatQuery(query, [...params]));
-
-        const result = await db.query(query, params);
-        res.json(result.rows[0]);
+        await db.query(query, params);
+        return res.json({ message: 'Medical record updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update medical record' });
     }
