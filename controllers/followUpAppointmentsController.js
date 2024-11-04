@@ -3,7 +3,22 @@ const db = require('../db');
 // Get all follow-up appointments
 exports.getAllFollowUpAppointments = async (req, res) => {
     try {
-        const sql = 'SELECT * FROM follow_up_appointments';
+        const sql = `
+            SELECT
+                f.id,
+                f.patient_name,
+                f.follow_up_date,
+                f.notes,
+                f.doctor_id,
+                d.name AS doctor_name,
+                p.fullname AS patient_name
+            FROM
+                follow_up_appointments f
+                    JOIN
+                doctors d ON f.doctor_id = d.id
+                    JOIN
+                patients p ON f.patient_name = p.id
+        `;
         console.log('SQL Query:', sql);
         const [appointments,] = await db.query(sql);
         return res.json(appointments);
