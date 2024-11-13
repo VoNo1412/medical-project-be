@@ -34,6 +34,7 @@ exports.getAppointments = async (req, res) => {
                 ba.appointment_time,
                 ba.status,
                 d.fullname AS doctor_name,
+                d.id AS doctor_id,
                 ba.content,
                 ba.created_at
             FROM
