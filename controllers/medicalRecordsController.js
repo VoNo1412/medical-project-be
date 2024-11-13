@@ -10,6 +10,7 @@ exports.getMedicalRecords = async (req, res) => {
             SELECT
                 medical_records.id,
                 patients.fullname AS patient_name,
+                doctors.id AS doctor_id,
                 doctors.fullname AS doctor_name,
                 medical_records.diagnosis,
                 medical_records.treatment,
