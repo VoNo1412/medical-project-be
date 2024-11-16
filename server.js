@@ -36,7 +36,7 @@ app.use(cookieParser());
 app.use(cors({
     origin: [
         'http://localhost:3000',
-        'https://ade2-42-116-206-220.ngrok-free.app',
+        'https://7874-42-116-206-220.ngrok-free.app',
         'https://nhakhoa-72d284770bf0.herokuapp.com',
         'https://b066-42-114-35-0.ngrok-free.app' // Add this line
     ],
