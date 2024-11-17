@@ -60,11 +60,11 @@ exports.register = async (req, res) => {
         const { username, password, fullname, phone, address, birthYear, gender } = req.body;
 
         const checkUserSql = "SELECT * FROM users WHERE username = ?";
-
         const [rows,] = await db.execute(checkUserSql, [username]);
 
         if (rows.length > 0) {
             console.log("Username already exists");
+            await db.query("ROLLBACK");
             return res.json("Username đã tồn tại");
         }
 
