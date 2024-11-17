@@ -35,12 +35,15 @@ exports.getAppointments = async (req, res) => {
                 ba.status,
                 d.fullname AS doctor_name,
                 d.id AS doctor_id,
+                s.name AS specialty,
                 ba.content,
                 ba.created_at
             FROM
                 booking_appointments ba
                     JOIN
                 doctors d ON ba.doctor_id = d.id
+                    JOIN
+                specialties s ON d.specialty = s.id
         `;
         const [appointments,] = await db.query(selectAppointmentsSql);
 
