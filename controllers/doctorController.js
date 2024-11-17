@@ -17,8 +17,10 @@ const upload = multer({ storage });
 
 exports.getDoctors = async (req, res) => {
     console.log("Get doctors request received");
+    const { specialtyId } = req.query;
+
     try {
-        const selectDoctorsSql = `
+        let selectDoctorsSql = `
             SELECT
                 d.id,
                 d.user_id,
@@ -42,7 +44,14 @@ exports.getDoctors = async (req, res) => {
                     LEFT JOIN
                 specialties s ON d.specialty = s.id
         `;
-        const [doctors,] = await db.query(selectDoctorsSql);
+
+        const queryParams = [];
+        if (specialtyId) {
+            selectDoctorsSql += ' WHERE d.specialty = ?';
+            queryParams.push(specialtyId);
+        }
+
+        const [doctors,] = await db.query(selectDoctorsSql, queryParams);
 
         console.log("Doctors retrieved", doctors);
         return res.json(doctors);
