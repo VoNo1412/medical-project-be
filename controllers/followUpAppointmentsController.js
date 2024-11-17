@@ -15,9 +15,9 @@ exports.getAllFollowUpAppointments = async (req, res) => {
                 p.fullname AS patient_name
             FROM
                 follow_up_appointments f
-                    JOIN
+                    LEFT JOIN 
                 doctors d ON f.doctor_id = d.id
-                    JOIN
+                    LEFT JOIN
                 patients p ON f.patient_name = p.id
         `;
         console.log('SQL Query:', sql);
