@@ -66,6 +66,16 @@ exports.addDoctor = async (req, res) => {
         try {
             await connection.beginTransaction();
 
+            // Check if username already exists
+            const checkUserSql = 'SELECT * FROM users WHERE username = ?';
+            const [existingUsers] = await connection.execute(checkUserSql, [username]);
+
+            if (existingUsers.length > 0) {
+                await connection.rollback();
+                console.log("Username already exists");
+                return res.status(400).json({ message: "Username already exists" });
+            }
+
             const hashedPassword = bcrypt.hashSync(password, 10);
             const insertUserSql = 'INSERT INTO users (username, password, role, status) VALUES (?, ?, "doctor", 1)';
             const [userResult] = await connection.execute(insertUserSql, [username, hashedPassword]);
