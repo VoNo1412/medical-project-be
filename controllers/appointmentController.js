@@ -18,6 +18,28 @@ exports.bookAppointment = async (req, res) => {
     }
 };
 
+exports.getUniqueAppointments = async (req, res) => {
+    console.log("Get unique appointments request received");
+    try {
+        const selectUniqueAppointmentsSql = `
+            SELECT DISTINCT
+                doctor_id,
+                user_id,
+                appointment_date,
+                appointment_time
+            FROM
+                booking_appointments
+        `;
+        const [uniqueAppointments,] = await db.query(selectUniqueAppointmentsSql);
+
+        console.log("Unique appointments retrieved", uniqueAppointments);
+        return res.json(uniqueAppointments);
+    } catch (error) {
+        console.log("Failed to retrieve unique appointments", error);
+        return res.status(500).json({ message: "An error occurred while fetching the unique appointments" });
+    }
+};
+
 exports.getAppointments = async (req, res) => {
     console.log("Get appointments request received");
     try {
