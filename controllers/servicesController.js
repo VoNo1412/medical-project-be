@@ -1,5 +1,17 @@
 const db = require('../db');
 
+
+exports.listServices = async (req, res) => {
+    try {
+        const listServicesSql = 'SELECT * FROM services';
+        const [services] = await db.query(listServicesSql);
+        res.status(200).json(services);
+    } catch (error) {
+        console.error('Failed to list services', error);
+        res.status(500).json({ message: "An error occurred while listing the services" });
+    }
+};
+
 // Controller to create a new service
 exports.createService = async (req, res) => {
     const { specialty_id, name, description, price } = req.body;
