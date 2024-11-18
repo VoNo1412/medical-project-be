@@ -38,7 +38,7 @@ app.use(cors({
     origin: [
         'http://localhost:3000',
         'http://localhost:3001',
-        'https://fb07-42-113-157-156.ngrok-free.app',
+        'https://2287-42-113-157-156.ngrok-free.app',
         'https://nhakhoa-72d284770bf0.herokuapp.com',
         'https://b066-42-114-35-0.ngrok-free.app' // Add this line
     ],
