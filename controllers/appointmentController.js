@@ -1,4 +1,5 @@
 const db = require('../db'); // Adjust the path as necessary
+const moment = require('moment-timezone');
 
 exports.bookAppointment = async (req, res) => {
     console.log("Book appointment request received", req.body);
@@ -17,8 +18,6 @@ exports.bookAppointment = async (req, res) => {
         return res.status(500).json({ message: "An error occurred while booking the appointment" });
     }
 };
-
-const moment = require('moment-timezone');
 
 exports.getUniqueAppointments = async (req, res) => {
     console.log("Get unique appointments request received");
