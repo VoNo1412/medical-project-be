@@ -17,7 +17,7 @@ const upload = multer({ storage });
 
 exports.getDoctors = async (req, res) => {
     console.log("Get doctors request received");
-    const { specialtyId } = req.query;
+    const { specialtyId, doctorId } = req.query;
 
     try {
         let selectDoctorsSql = `
@@ -43,12 +43,17 @@ exports.getDoctors = async (req, res) => {
                 users u ON d.user_id = u.id
                     LEFT JOIN
                 specialties s ON d.specialty = s.id
+            WHERE TRUE
         `;
 
         const queryParams = [];
         if (specialtyId) {
-            selectDoctorsSql += ' WHERE d.specialty = ?';
+            selectDoctorsSql += ' AND d.specialty = ?';
             queryParams.push(specialtyId);
+        }
+
+        if (doctorId) {
+            selectDoctorsSql += ` AND d.id = ${doctorId}`
         }
 
         const [doctors,] = await db.query(selectDoctorsSql, queryParams);

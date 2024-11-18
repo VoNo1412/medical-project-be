@@ -48,7 +48,7 @@ exports.getUniqueAppointments = async (req, res) => {
 };
 
 exports.getAppointments = async (req, res) => {
-    const { today } = req.query; // Expect 'today' as a query parameter (e.g., ?today=2024-11-18)
+    const { today, benhNhanId } = req.query; // Expect 'today' as a query parameter (e.g., ?today=2024-11-18)
     console.log("Get appointments request received");
 
     try {
@@ -76,14 +76,21 @@ exports.getAppointments = async (req, res) => {
                 doctors d ON ba.doctor_id = d.id
                     JOIN
                 specialties s ON d.specialty = s.id
+            WHERE TRUE 
         `;
 
         // Add the date filter if 'today' is passed in the query
         if (today) {
             // Convert database date to Vietnam time (UTC+7)
             selectAppointmentsSql += `
-                WHERE DATE(CONVERT_TZ(ba.appointment_date, '+00:00', '+07:00')) = '${today}'
+                AND DATE(CONVERT_TZ(ba.appointment_date, '+00:00', '+07:00')) = '${today}'
             `;
+        }
+
+        if (benhNhanId) {
+            selectAppointmentsSql += `
+                AND ba.user_id = '${benhNhanId}'
+            `
         }
 
         const [appointments] = await db.query(selectAppointmentsSql);
