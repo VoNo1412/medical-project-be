@@ -18,6 +18,8 @@ exports.bookAppointment = async (req, res) => {
     }
 };
 
+const moment = require('moment-timezone');
+
 exports.getUniqueAppointments = async (req, res) => {
     console.log("Get unique appointments request received");
     try {
@@ -32,8 +34,14 @@ exports.getUniqueAppointments = async (req, res) => {
         `;
         const [uniqueAppointments,] = await db.query(selectUniqueAppointmentsSql);
 
-        console.log("Unique appointments retrieved", uniqueAppointments);
-        return res.json(uniqueAppointments);
+        // Convert appointment_date to Vietnam timezone
+        const convertedAppointments = uniqueAppointments.map(appointment => {
+            appointment.appointment_date = moment(appointment.appointment_date).tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
+            return appointment;
+        });
+
+        console.log("Unique appointments retrieved", convertedAppointments);
+        return res.json(convertedAppointments);
     } catch (error) {
         console.log("Failed to retrieve unique appointments", error);
         return res.status(500).json({ message: "An error occurred while fetching the unique appointments" });
