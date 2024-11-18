@@ -48,7 +48,7 @@ exports.getUniqueAppointments = async (req, res) => {
 };
 
 exports.getAppointments = async (req, res) => {
-    const { today, benhNhanId } = req.query; // Expect 'today' as a query parameter (e.g., ?today=2024-11-18)
+    const { today, benhNhanId, doctorId } = req.query; // Expect 'today' as a query parameter (e.g., ?today=2024-11-18)
     console.log("Get appointments request received");
 
     try {
@@ -74,37 +74,49 @@ exports.getAppointments = async (req, res) => {
                 booking_appointments ba
                     JOIN
                 doctors d ON ba.doctor_id = d.id
-                    JOIN
+                  LEFT  JOIN
                 specialties s ON d.specialty = s.id
             WHERE TRUE 
         `;
 
+        const params = [];
+
         // Add the date filter if 'today' is passed in the query
         if (today) {
-            // Convert database date to Vietnam time (UTC+7)
             selectAppointmentsSql += `
-                AND DATE(CONVERT_TZ(ba.appointment_date, '+00:00', '+07:00')) = '${today}'
+                AND DATE(CONVERT_TZ(ba.appointment_date, '+00:00', '+07:00')) = ?
             `;
+            params.push(today);
+        }
+
+        if (doctorId) {
+            selectAppointmentsSql += `
+                AND ba.doctor_id = ${doctorId}
+            `;
+            params.push(doctorId);
         }
 
         if (benhNhanId) {
             selectAppointmentsSql += `
-                AND ba.user_id = '${benhNhanId}'
-            `
+                AND ba.user_id = ${benhNhanId}
+            `;
+            params.push(benhNhanId);
         }
-
-        const [appointments] = await db.query(selectAppointmentsSql);
+        console.log("selectAppointmentsSql: ", selectAppointmentsSql, benhNhanId, doctorId)
+        // Execute the query with parameterized inputs
+        const [appointments] = await db.query(selectAppointmentsSql, params);
 
         console.log("Appointments retrieved", appointments);
         return res.json(appointments);
     } catch (error) {
-        console.log("Failed to retrieve appointments", error);
+        console.error("Failed to retrieve appointments", error);
         return res.status(500).json({
             message: "An error occurred while fetching the appointments",
             error: error.message,
         });
     }
 };
+
 
 
 

@@ -2,10 +2,10 @@ const db = require('../db');
 
 
 exports.listServices = async (req, res) => {
-    const {specialty_id}= req.query;
+    const { specialty_id } = req.query;
     try {
-        const listServicesSql = 'SELECT * FROM services WHERE = TRUE';
-        if (!!specialty_id && specialty_id) {
+        let listServicesSql = 'SELECT * FROM services WHERE TRUE ';
+        if (specialty_id) {
             listServicesSql += `and specialty_id = ${specialty_id}`
         }
         const [services] = await db.query(listServicesSql);
