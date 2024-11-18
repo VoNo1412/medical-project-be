@@ -147,6 +147,8 @@ app.use('/doctors', doctorRoutes);
 app.use('/appointments', appointmentRoutes);
 app.use('/patients', patientRoutes);
 app.use('/specialties', specialtyRoutes);
+app.use('/services', servicesRoutes);
+
 
 // API to add a new appointment
 app.post('/hour_appointments', async (req, res) => {
