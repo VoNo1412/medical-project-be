@@ -14,7 +14,8 @@ exports.getMedicalRecords = async (req, res) => {
                 doctors.fullname AS doctor_name,
                 medical_records.diagnosis,
                 medical_records.treatment,
-                medical_records.record_date
+                medical_records.record_date,
+                medical_records.services
             FROM medical_records
                      JOIN patients ON medical_records.patient_id = patients.id
                      JOIN doctors ON medical_records.doctor_id = doctors.id
@@ -24,6 +25,11 @@ exports.getMedicalRecords = async (req, res) => {
         const [medicalRecords,] = await db.query(query);
         console.log('Query result:', medicalRecords);
 
+        // Parse the services field from JSON string to array
+        medicalRecords.forEach(record => {
+            record.services = JSON.parse(record.services);
+        });
+
         res.json(medicalRecords);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch medical records' });
@@ -31,11 +37,11 @@ exports.getMedicalRecords = async (req, res) => {
 };
 
 exports.addMedicalRecord = async (req, res) => {
-    const { patient_id, doctor_id, diagnosis, treatment, record_date } = req.body;
-    console.log('Received data:', { patient_id, doctor_id, diagnosis, treatment, record_date });
+    const { patient_id, doctor_id, diagnosis, treatment, record_date, services } = req.body;
+    console.log('Received data:', { patient_id, doctor_id, diagnosis, treatment, record_date, services });
     try {
-        const query = 'INSERT INTO medical_records (patient_id, doctor_id, diagnosis, treatment, record_date) VALUES (?, ?, ?, ?, ?)';
-        const params = [patient_id, doctor_id, diagnosis, treatment, record_date];
+        const query = 'INSERT INTO medical_records (patient_id, doctor_id, diagnosis, treatment, record_date, services) VALUES (?, ?, ?, ?, ?, ?)';
+        const params = [patient_id, doctor_id, diagnosis, treatment, record_date, JSON.stringify(services)];
         console.log('Executing query:', formatQuery(query, [...params]));
 
         await db.query(query, params);
@@ -48,10 +54,10 @@ exports.addMedicalRecord = async (req, res) => {
 
 exports.updateMedicalRecord = async (req, res) => {
     const { id } = req.params;
-    const { patient_id, doctor_id, diagnosis, treatment, record_date } = req.body;
+    const { patient_id, doctor_id, diagnosis, treatment, record_date, services } = req.body;
     try {
-        const query = 'UPDATE medical_records SET patient_id = ?, doctor_id = ?, diagnosis = ?, treatment = ?, record_date = ? WHERE id = ?';
-        const params = [patient_id, doctor_id, diagnosis, treatment, record_date, id];
+        const query = 'UPDATE medical_records SET patient_id = ?, doctor_id = ?, diagnosis = ?, treatment = ?, record_date = ?, services = ? WHERE id = ?';
+        const params = [patient_id, doctor_id, diagnosis, treatment, record_date, JSON.stringify(services), id];
         console.log('Executing query:', formatQuery(query, [...params]));
         await db.query(query, params);
         return res.json({ message: 'Medical record updated successfully' });
