@@ -50,23 +50,22 @@ app.use(cors({
 // Tạo kết nối đến cơ sở dữ liệu MySQL
 
 let db = null;
-
 async function connectDatabase() {
     db = await mysql.createPool({
-        host: process.env.DB_HOST || "103.221.222.62",
-        user: process.env.DB_USER || "waghgljj_nhakhoauser",
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER || 'root',
         port: process.env.DB_PORT || 3306,
-        password: process.env.DB_PASSWORD || "!pr9bTW8vmeLwHY",
-        database: process.env.DB_NAME || "waghgljj_nhakhoa",
+        password: process.env.DB_PASSWORD || '',
+        database: process.env.DB_NAME || 'nhakhoa',
         timezone: '+07:00',
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0
     });
-    console.log("Database connected");
+    console.log('Database connected');
 }
-
 connectDatabase();
+
 
 // Authentication middleware
 function authMiddleware(req, res, next) {

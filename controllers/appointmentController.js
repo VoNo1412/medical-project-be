@@ -48,9 +48,11 @@ exports.getUniqueAppointments = async (req, res) => {
 };
 
 exports.getAppointments = async (req, res) => {
+    const { today } = req.query; // Expect 'today' as a query parameter (e.g., ?today=2024-11-18)
     console.log("Get appointments request received");
+
     try {
-        const selectAppointmentsSql = `
+        let selectAppointmentsSql = `
             SELECT
                 ba.id,
                 ba.user_id,
@@ -61,6 +63,7 @@ exports.getAppointments = async (req, res) => {
                 ba.birth_year,
                 ba.appointment_date,
                 ba.appointment_time,
+                HOUR(ba.appointment_time) AS hour, -- Extract the hour from appointment_time
                 ba.status,
                 d.fullname AS doctor_name,
                 d.id AS doctor_id,
@@ -74,15 +77,29 @@ exports.getAppointments = async (req, res) => {
                     JOIN
                 specialties s ON d.specialty = s.id
         `;
-        const [appointments,] = await db.query(selectAppointmentsSql);
+
+        // Add the date filter if 'today' is passed in the query
+        if (today) {
+            // Convert database date to Vietnam time (UTC+7)
+            selectAppointmentsSql += `
+                WHERE DATE(CONVERT_TZ(ba.appointment_date, '+00:00', '+07:00')) = '${today}'
+            `;
+        }
+
+        const [appointments] = await db.query(selectAppointmentsSql);
 
         console.log("Appointments retrieved", appointments);
         return res.json(appointments);
     } catch (error) {
         console.log("Failed to retrieve appointments", error);
-        return res.status(500).json({ message: "An error occurred while fetching the appointments", error: error.message });
+        return res.status(500).json({
+            message: "An error occurred while fetching the appointments",
+            error: error.message,
+        });
     }
 };
+
+
 
 exports.confirmAppointment = async (req, res) => {
     console.log("Confirm appointment request received", req.params);
