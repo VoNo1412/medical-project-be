@@ -25,6 +25,7 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const followUpAppointmentsRoutes = require('./routes/followUpAppointmentsRoutes');
 const specialtyRoutes = require('./routes/specialtyRoutes');
+const servicesRoutes = require('./routes/services');
 
 
 // Tạo một instance của ứng dụng Express
