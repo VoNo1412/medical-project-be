@@ -31,7 +31,7 @@ exports.getMedicalRecords = async (req, res) => {
             FROM medical_records
                      JOIN patients ON medical_records.patient_id = patients.id
                      JOIN doctors ON medical_records.doctor_id = doctors.id
-                     join booking_appointments ba on ba.id = medical_records.appointment_id
+                     left join booking_appointments ba on ba.id = medical_records.appointment_id
                      left join doctors d ON ba.doctor_id = d.id
                      LEFT  JOIN specialties s ON d.specialty = s.id
                      LEFT  JOIN services se ON se.id = medical_records.service_id
