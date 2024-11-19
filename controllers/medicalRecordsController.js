@@ -53,11 +53,11 @@ exports.getMedicalRecords = async (req, res) => {
 };
 
 exports.addMedicalRecord = async (req, res) => {
-    const { patient_id, doctor_id, diagnosis, treatment, record_date, appt_id, service_id, amount } = req.body;
+    const { patient_id, doctor_id, diagnosis, treatment, record_date, appt_id, amount } = req.body;
     console.log('Received data:', { patient_id, doctor_id, diagnosis, treatment, record_date });
     try {
-        const query = 'INSERT INTO medical_records (patient_id, doctor_id, diagnosis, treatment, record_date, appointment_id, service_id, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-        const params = [patient_id, doctor_id, diagnosis, treatment, record_date, appt_id, service_id, amount];
+        const query = 'INSERT INTO medical_records (patient_id, doctor_id, diagnosis, treatment, record_date, appointment_id, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        const params = [patient_id, doctor_id, diagnosis, treatment, record_date, appt_id, amount];
         console.log('Executing query:', formatQuery(query, [...params]));
 
         await db.query(query, params);
