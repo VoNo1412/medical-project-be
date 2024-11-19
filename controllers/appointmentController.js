@@ -69,16 +69,13 @@ exports.getAppointments = async (req, res) => {
                 d.id AS doctor_id,
                 s.name AS specialty,
                 ba.content,
-                ba.created_at,
-                ba.id as appt_id
+                ba.created_at
             FROM
                 booking_appointments ba
                     JOIN
                 doctors d ON ba.doctor_id = d.id
                   LEFT  JOIN
                 specialties s ON d.specialty = s.id
-                LEFT  JOIN
-                patients p ON p.user_id = ba.user_id
             WHERE TRUE 
         `;
 
